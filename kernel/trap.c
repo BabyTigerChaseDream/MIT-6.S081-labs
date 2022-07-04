@@ -67,12 +67,39 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+  } else if (15 == r_scause()) {
+    uint64 pa;
+    char* ka;
+    uint flags;
+    uint64 va = PGROUNDDOWN(r_stval());
+    pte_t* pte = walk(p->pagetable, va, 0);
+    if (0 == pte) {
+      panic("usertrap(): pte should exist");
+    }
+    if (0 == (*pte & PTE_V)) {
+      panic("usertrap(): page not present");
+    }
+    if (0 == (*pte & PTE_C)) {
+      goto UNKNOWN;
+    }
+    pa = PTE2PA(*pte);
+    if (0 == (ka = kalloc())) {
+      p->killed = 1;
+      printf("usertrap(): no free memory available\n");
+      goto EXIT;
+    }
+    memmove(ka, (char*) pa, PGSIZE);
+    kfree((void*) pa);  // ATTEMPT to free the original PTE.
+    flags = (PTE_FLAGS(*pte) | PTE_W) & ~PTE_C;  // Get the new flag.
+    *pte = PA2PTE(ka) | flags;
   } else {
+UNKNOWN:
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     p->killed = 1;
   }
 
+EXIT:
   if(p->killed)
     exit(-1);
 
