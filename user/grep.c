@@ -18,7 +18,8 @@ grep(char* pattern, int fd) {
         buf[m] = '\0';
         p = buf;
         while ((q = strchr(p, '\n')) != 0) {
-            *q = 0;
+            // Jia no difference observed
+            // *q = 0;
             if (match(pattern, p)) {
                 *q = '\n';
                 write(1, p, q + 1 - p);
@@ -80,8 +81,10 @@ match(char* re, char* text) {
 int matchhere(char* re, char* text) {
     if (re[0] == '\0')
         return 1;
-    if (re[1] == '*')
+    if (re[1] == '*'){
+        printf("# re is %s #",re);
         return matchstar(re[0], re + 2, text);
+    }
     if (re[0] == '$' && re[1] == '\0')
         return *text == '\0';
     if (*text != '\0' && (re[0] == '.' || re[0] == *text))

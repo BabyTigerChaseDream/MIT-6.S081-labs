@@ -21,6 +21,7 @@ void pass(int p_r) {
         int buf;  // Read & Write.
         while (0 != read(p_r, &buf, sizeof(int))) {
             if (0 != buf % div) {
+                printf("[write div] div=%d\n",div);
                 write(p[1], &buf, sizeof(int));
             }
         }

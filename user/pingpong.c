@@ -16,7 +16,7 @@ int main(void) {
             exit(1);
         }
         close(p[0]);
-        printf("%d: received ping\n", getpid());
+        printf("%d: child received ping %s\n", getpid(),buf);
         if (1 != write(p[1], buf, 1)) {
             fprintf(2, "Write error.\n");
             exit(1);
@@ -24,7 +24,8 @@ int main(void) {
         close(p[1]);
         exit(0);
     } else {
-        if (1 != write(p[1], "\x01", 1)) { // Write to the pipe and close the write side.
+        // if (1 != write(p[1], "\x01", 1)) { // Write to the pipe and close the write side.
+        if (1 != write(p[1], "G", 1)) { // Write to the pipe and close the write side.
             fprintf(2, "Write error.\n");
             exit(1);
         }
@@ -35,7 +36,7 @@ int main(void) {
             exit(1);
         }
         close(p[0]);
-        printf("%d: received pong\n", getpid());
+        printf("%d: parent received pong\n", getpid());
         exit(0);
     }
 }

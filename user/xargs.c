@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
     while (get_argv(args, argc - 1)) {
         if (0 == fork()) {
             exec(cmd, args);  // IMPORTANT: Exec ignores args[0]!!!
+            printf("[exec] %s\n",cmd);
             fprintf(2, "exec %s failed\n", cmd);
             exit(1);
         } else {
